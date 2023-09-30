@@ -38,6 +38,7 @@ public class CategoryController : Controller
 
         _db.Categories.Add(obj);
         _db.SaveChanges();
+        TempData["success"] = "Category created successfully";
         return RedirectToAction("Index");
     }
 
@@ -60,14 +61,13 @@ public class CategoryController : Controller
     [HttpPost]
     public IActionResult Edit(Category obj)
     {
-        if (ModelState.IsValid)
-        {
-            _db.Categories.Update(obj);
-            _db.SaveChanges();
-            return RedirectToAction("Index");
-        }
+        if (!ModelState.IsValid) return View();
+        
+        _db.Categories.Update(obj);
+        _db.SaveChanges();
+        TempData["success"] = "Category Edited successfully";
+        return RedirectToAction("Index");
 
-        return View();
     }
 
     public IActionResult Delete(int? id)
@@ -97,6 +97,7 @@ public class CategoryController : Controller
 
         _db.Remove(obj);
         _db.SaveChanges();
+        TempData["success"] = "Category deleted successfully";
         return RedirectToAction("Index");
     }
 }
