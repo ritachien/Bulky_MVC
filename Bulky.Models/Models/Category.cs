@@ -1,8 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http.Features;
 
-namespace BulkyWeb.Models;
+namespace Bulky.Models.Models;
 
 public class Category
 {
