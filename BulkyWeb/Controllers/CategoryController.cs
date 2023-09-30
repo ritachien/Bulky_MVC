@@ -33,12 +33,45 @@ public class CategoryController : Controller
         {
             ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the name.");
         }
-        
+
         if (!ModelState.IsValid) return View(obj);
-        
+
         _db.Categories.Add(obj);
         _db.SaveChanges();
         return RedirectToAction("Index");
+    }
 
+    public IActionResult Edit(int? id)
+    {
+        if (id is 0 or null)
+        {
+            return NotFound();
+        }
+
+        var categoryFromDb = _db.Categories.FirstOrDefault(c => c.Id == id);
+        if (categoryFromDb == null)
+        {
+            return NotFound();
+        }
+
+        return View(categoryFromDb);
+    }
+
+    [HttpPost]
+    public IActionResult Edit(Category obj)
+    {
+        if (ModelState.IsValid)
+        {
+            _db.Categories.Update(obj);
+            _db.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
+        return View();
+    }
+
+    public IActionResult Delete()
+    {
+        throw new NotImplementedException();
     }
 }
