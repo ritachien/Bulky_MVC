@@ -1,6 +1,8 @@
 ﻿using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models.Models;
+using BulkyBook.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BulkyBookWeb.Areas.Admin.Controllers;
 
@@ -22,18 +24,36 @@ public class ProductController : Controller
 
     public IActionResult Create()
     {
-        return View();
+        var productViewModel = new ProductViewModel
+        {
+            Product = new Product(),
+            CategoryList = _unitOfWork.Category.GetAll().Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString(),
+            }),
+        };
+
+        return View(productViewModel);
     }
 
     [HttpPost]
-    public IActionResult Create(Product obj)
+    public IActionResult Create(ProductViewModel productViewModel)
     {
-        if (!ModelState.IsValid) return View(obj);
+        if (ModelState.IsValid)
+        {
+            _unitOfWork.Product.Add(productViewModel.Product);
+            _unitOfWork.Save();
+            TempData["success"] = "Product created successfully";
+            return RedirectToAction("Index");
+        }
 
-        _unitOfWork.Product.Add(obj);
-        _unitOfWork.Save();
-        TempData["success"] = "Product created successfully";
-        return RedirectToAction("Index");
+        productViewModel.CategoryList = _unitOfWork.Category.GetAll().Select(c => new SelectListItem
+        {
+            Text = c.Name,
+            Value = c.Id.ToString(),
+        });
+        return View(productViewModel);
     }
 
     public IActionResult Edit(int? id)
