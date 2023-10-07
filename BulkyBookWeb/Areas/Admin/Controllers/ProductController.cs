@@ -22,7 +22,7 @@ public class ProductController : Controller
         return View(objProductList);
     }
 
-    public IActionResult Create()
+    public IActionResult Upsert(int? id)
     {
         var productViewModel = new ProductViewModel
         {
@@ -34,11 +34,25 @@ public class ProductController : Controller
             }),
         };
 
+        if (id is null or 0)
+        {
+            return View(productViewModel);
+        }
+
+        var product = _unitOfWork.Product.Get(p => p.Id == id);
+        if (product == null)
+        {
+            TempData["error"] = $"No product match id: {id}";
+        }
+        else
+        {
+            productViewModel.Product = product;
+        }
         return View(productViewModel);
     }
 
     [HttpPost]
-    public IActionResult Create(ProductViewModel productViewModel)
+    public IActionResult Upsert(ProductViewModel productViewModel, IFormFile? file)
     {
         if (ModelState.IsValid)
         {
@@ -54,49 +68,6 @@ public class ProductController : Controller
             Value = c.Id.ToString(),
         });
         return View(productViewModel);
-    }
-
-    public IActionResult Edit(int? id)
-    {
-        if (id is 0 or null)
-        {
-            return NotFound();
-        }
-
-        var productFromDb = _unitOfWork.Product.Get(c => c.Id == id);
-        if (productFromDb == null)
-        {
-            return NotFound();
-        }
-
-        return View(productFromDb);
-    }
-
-    [HttpPost]
-    public IActionResult Edit(Product obj)
-    {
-        if (!ModelState.IsValid) return View();
-
-        _unitOfWork.Product.Update(obj);
-        _unitOfWork.Save();
-        TempData["success"] = "Product Edited successfully";
-        return RedirectToAction("Index");
-    }
-
-    public IActionResult Delete(int? id)
-    {
-        if (id is 0 or null)
-        {
-            return NotFound();
-        }
-
-        var productFromDb = _unitOfWork.Product.Get(c => c.Id == id);
-        if (productFromDb == null)
-        {
-            return NotFound();
-        }
-
-        return View(productFromDb);
     }
 
     [HttpPost, ActionName("Delete")]
